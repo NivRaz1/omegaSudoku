@@ -25,7 +25,7 @@ namespace sudoku
 
 
             sw = Stopwatch.StartNew();
-            Solver.solveSudoku(board);
+            Solver.solveSudokuMRV(board);
             sw.Stop();
 
             Console.WriteLine("\nAfter solving:");
