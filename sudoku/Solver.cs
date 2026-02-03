@@ -11,13 +11,11 @@ namespace sudoku
         private static bool isSafe(int[,] mat, int i, int j, int num,
                            int[] row, int[] col, int[] box)
         {
-
             if ((row[i] & (1 << num)) != 0 || (col[j] & (1 << num)) != 0 ||
                 (box[i / 3 * 3 + j / 3] & (1 << num)) != 0)
             {
                 return false;
             }
-
             return true;
         }
 
@@ -47,7 +45,6 @@ namespace sudoku
 
             for (int num = 1; num <= n; num++)
             {
-
                 // If it is safe to place num at current position
                 if (isSafe(mat, i, j, num, row, col, box))
                 {
@@ -70,7 +67,6 @@ namespace sudoku
                     box[i / 3 * 3 + j / 3] &= ~(1 << num);
                 }
             }
-
             return false;
         }
 
@@ -94,7 +90,6 @@ namespace sudoku
                     }
                 }
             }
-
             return sudokuSolverRec(mat, 0, 0, row, col, box);
         }
     }
