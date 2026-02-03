@@ -9,188 +9,141 @@ namespace sudoku
     internal class Solver
     {
         private const int SIZE = 9;
-        private const int SQUARE_SIZE = 3;
-        private static bool isSafe(int[,] board, int i, int j, int num,
-                           int[] row, int[] col, int[] box)
+        private const int FULL_MASK = 0b1111111110;
+
+        private static int countBits(int domain)
         {
-            if ((row[i] & (1 << num)) != 0 || (col[j] & (1 << num)) != 0 ||
-                (box[i / 3 * 3 + j / 3] & (1 << num)) != 0)
+            int count = 0;
+            //counting the number of bits that are on
+            while(domain != 0)
+            {
+                domain &= domain - 1;
+                count++;
+            }
+            return count;
+        }
+        private static bool findMrvCell(int[,] board, int[] row, int[] col,
+            int[] box, ref int rowIndex, ref int colIndex, ref int minDomain)
+        {
+            int i = 0, j = 0, boxIndex = 0;
+            int domain = 0, count = 0, minCount = int.MaxValue;
+            bool found = false;
+
+            for (i = 0; i < SIZE; i++)
+            {
+                for (j = 0; j < SIZE; j++)
+                {
+                    // the cell is not empty
+                    if (board[i, j] != 0) continue;
+
+                    boxIndex = (i / 3) * 3 + (j / 3);
+                    //calculating the domain of avilable numbers for the cell
+                    domain = FULL_MASK & ~(row[i] | col[j] | box[boxIndex]);
+                    //counting the domain length
+                    count = countBits(domain);
+
+                    //if there are 0 avilable moves then its a dead end
+                    if (count == 0)
+                    {
+                        minDomain = 0;
+                        return false;
+                    }
+
+                    //if there are less remaining values
+                    if (count < minCount)
+                    {
+                        //saving the cell and it's domain information
+                        minCount = count;
+                        rowIndex = i;
+                        colIndex = j;
+                        minDomain = domain;
+                        found = true; // found an empty cell
+
+                        //if the cell has only 1 legal move
+                        //then it's the strongest chice
+                        if (count == 1)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            //if didn't found an empty cell then board is complete
+            if(!found)
+            {
+                minDomain = 0;
+                return true;
+            }
+            //found cell and is not a dead end
+            return true;
+        }
+        private static bool sudokuSolverRec(int[,] board, int[] row, int[] col, int[] box)
+        {
+            int rowIndex = 0, colIndex = 0, boxIndex = 0;
+            int domain = 0, bit = 0, num = 0;
+
+            //checking if the board is solved
+            if (!findMrvCell(board, row, col, box, ref rowIndex, ref colIndex, ref domain))
             {
                 return false;
             }
-            return true;
-        }
 
-        private static bool sudokuSolverRec(int[,] board, int i, int j,
-                                    int[] row, int[] col, int[] box)
-        {
-            int n = board.GetLength(0);
-
-            // base case: Reached nth column of last row
-            if (i == n - 1 && j == n)
+            //if the domain is 0 and we didn't get false
+            //on findMrvCell then the board is complete
+            if(domain == 0)
             {
                 return true;
-            }
+            }    
 
-            // If reached last column of the row, go to next row
-            if (j == n)
+            boxIndex = (rowIndex / 3) *3 + (colIndex / 3);
+
+            for (num = 1; num <= 9; num++)
             {
-                i++;
-                j = 0;
-            }
+                //checking if the bit for the number is on
+                bit = 1 << num;
+                if ((domain & bit) == 0) continue;
 
-            // If cell is already occupied, then move forward
-            if (board[i, j] != 0)
-            {
-                return sudokuSolverRec(board, i, j + 1, row, col, box);
-            }
+                //Update masks for the corresponding row, column, and box
+                board[rowIndex, colIndex] = num;
+                row[rowIndex] |= bit;
+                col[colIndex] |= bit;
+                box[boxIndex] |= bit;
 
-            for (int num = 1; num <= n; num++)
-            {
-                // If it is safe to place num at current position
-                if (isSafe(board, i, j, num, row, col, box))
-                {
-                    board[i, j] = num;
+                if (sudokuSolverRec(board, row, col, box))
+                    return true;
 
-                    // Update masks for the corresponding row, column, and box
-                    row[i] |= (1 << num);
-                    col[j] |= (1 << num);
-                    box[i / 3 * 3 + j / 3] |= (1 << num);
-
-                    if (sudokuSolverRec(board, i, j + 1, row, col, box))
-                    {
-                        return true;
-                    }
-
-                    // Unmask the number num in the corresponding row, column and box masks
-                    board[i, j] = 0;
-                    row[i] &= ~(1 << num);
-                    col[j] &= ~(1 << num);
-                    box[i / 3 * 3 + j / 3] &= ~(1 << num);
-                }
+                //Unmask the number num in the corresponding row, column and box masks
+                board[rowIndex, colIndex] = 0;
+                row[rowIndex] &= ~bit;
+                col[colIndex] &= ~bit;
+                box[boxIndex] &= ~bit;
             }
             return false;
         }
 
         public static bool solveSudoku(int[,] board)
         {
-            int n = board.GetLength(0);
-            int[] row = new int[n];
-            int[] col = new int[n];
-            int[] box = new int[n];
+            int value = 0, bit = 0;
+            int[] row = new int[SIZE];
+            int[] col = new int[SIZE];
+            int[] box = new int[SIZE];
 
             // Set the bits in bitmasks for values that are initially present
-            for (int i = 0; i < n; i++)
+            for (int i = 0; i < SIZE; i++)
             {
-                for (int j = 0; j < n; j++)
+                for (int j = 0; j < SIZE; j++)
                 {
-                    if (board[i, j] != 0)
-                    {
-                        row[i] |= (1 << board[i, j]);
-                        col[j] |= (1 << board[i, j]);
-                        box[(i / 3) * 3 + j / 3] |= (1 << board[i, j]);
-                    }
+                    value = board[i, j];
+                    if (value == 0) { continue; }
+
+                    bit = 1 << value;
+                    row[i] |= bit;
+                    col[j] |= bit;
+                    box[(i / 3) * 3 + j / 3] |= bit;
                 }
             }
-            return sudokuSolverRec(board, 0, 0, row, col, box);
-        }
-
-        private static int[] findDomain(int[,] board, int i, int j)
-        {
-            HashSet<int> domain = new HashSet<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            HashSet<int> used = new HashSet<int>();
-            int row = 0, col = 0;
-            
-            for(col = 0; col < SIZE; col++)
-            {
-                used.Add(board[i, col]);
-            }
-
-            for(row = 0; row < SIZE; row++)
-            {
-                used.Add(board[row, j]);
-            }
-
-            row = (i / SQUARE_SIZE) * SQUARE_SIZE;
-            col = (j / SQUARE_SIZE) * SQUARE_SIZE;
-
-            for(int a = 0; a < SQUARE_SIZE; a++)
-            {
-                for(int b = 0;  b < SQUARE_SIZE; b++)
-                {
-                    used.Add(board[row + a, col + b]);
-                }
-            }
-
-            domain.ExceptWith(used);
-            return domain.ToArray();
-        }
-        private static bool solved(int[,] board)
-        {
-            int i = 0, j = 0;
-
-            for(i = 0; i < SIZE; i++)
-            {
-                for(j = 0; j < SIZE; j++)
-                {
-                    if (board[i, j] == 0) return false;
-                }
-            }
-            return true;
-        }
-
-        private static int[] findMrvCell(int[,] board, ref int row, ref int col)
-        {
-            int i = 0, j = 0;
-            int[] domain = null, minDomain = null;
-
-            for(i = 0; i < SIZE; i ++)
-            {
-                for(j = 0; j < SIZE; j ++)
-                {
-                    if (board[i, j] == 0)
-                    {
-                        domain = findDomain(board, i, j);
-
-                        if(domain.Length == 0)
-                        {
-                            row = i; col = j;
-                            return domain;
-                        }
-
-                        if(minDomain == null || domain.Length < minDomain.Length)
-                        {
-                            minDomain = domain;
-                            row = i; col = j;
-                        }
-                    }
-                }
-            }
-            return minDomain;
-        }
-
-        public static bool solveSudokuMRV(int[,] board)
-        {
-            int row = 0, col = 0;
-            int[] domain = null;
-
-            if(solved(board))
-            {
-                return true;
-            }
-
-            domain = findMrvCell(board, ref row, ref col);
-
-            foreach ( int num in  domain )
-            {
-                board[row, col] = num;
-                if(solveSudokuMRV(board))
-                {
-                    return true;
-                }
-                board[row, col] = 0;
-            }
-            return false;
+            return sudokuSolverRec(board, row, col, box);
         }
     }
 }

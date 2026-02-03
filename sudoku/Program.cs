@@ -15,24 +15,30 @@ namespace sudoku
             int[,] board;
             Stopwatch sw;
 
-            //getting the sudoku from user and converting the string to matrix
-            Console.WriteLine("Enter sudoku board:");
-            boardStr = Console.ReadLine();
-            board = Formatting.boardToStr(boardStr);
+            while (true)
+            {
+                //getting the sudoku from user and converting the string to matrix
+                Console.WriteLine("Enter sudoku board(enter END to exit):\n");
+                boardStr = Console.ReadLine();
 
-            Console.WriteLine("\nBefore solving:");
-            Formatting.printBoard(board);
+                if (boardStr.Equals("END")) break;
+
+                board = Formatting.boardToStr(boardStr);
+
+                Console.WriteLine("\nBefore solving:");
+                Formatting.printBoard(board);
 
 
-            sw = Stopwatch.StartNew();
-            Solver.solveSudokuMRV(board);
-            sw.Stop();
+                sw = Stopwatch.StartNew();
+                Solver.solveSudoku(board);
+                sw.Stop();
 
-            Console.WriteLine("\nAfter solving:");
-            Formatting.printBoard(board);
-            Console.WriteLine($"Took the program " +
-                $"{sw.Elapsed.TotalMilliseconds:F3} " +
-                $"ms to solve the sudoku");
+                Console.WriteLine("\nAfter solving:");
+                Formatting.printBoard(board);
+                Console.WriteLine($"Took the program " +
+                    $"{sw.Elapsed.TotalMilliseconds:F3} " +
+                    $"ms to solve the sudoku\n");
+            }
         }
     }
 }
