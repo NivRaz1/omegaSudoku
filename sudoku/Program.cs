@@ -21,9 +21,20 @@ namespace sudoku
                 Console.WriteLine("Enter sudoku board(enter END to exit):\n");
                 boardStr = Console.ReadLine();
 
-                if (boardStr.Equals("END")) break;
+                if (boardStr.ToUpper().Equals("END")) break;
+                if(!validate.checkBoard(boardStr))
+                {
+                    Console.WriteLine("Invalid board");
+                    continue;
+                }
 
                 board = Formatting.boardToStr(boardStr);
+
+                if(!validate.checkCorrectness(board))
+                {
+                    Console.WriteLine("The board is unsolvable");
+                    continue;
+                }
 
                 Console.WriteLine("\nBefore solving:");
                 Formatting.printBoard(board);

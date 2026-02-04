@@ -137,7 +137,7 @@ namespace sudoku
                     value = board[i, j];
                     if (value == 0) { continue; }
 
-                    bit = 1 << value;
+                bit = 1 << value;
                     row[i] |= bit;
                     col[j] |= bit;
                     box[(i / 3) * 3 + j / 3] |= bit;
