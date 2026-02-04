@@ -11,6 +11,7 @@ namespace sudoku
         private const int SIZE = 9;
         private const int SQUARE_COUNT = 3;
 
+        //converting the board input to sudoku board
         public static int[,] boardToStr(String boardStr)
         {
             int[,] board = new int[SIZE, SIZE];
@@ -27,6 +28,7 @@ namespace sudoku
             return board;
         }
 
+        //printing the board
         public static void printBoard(int[,] board)
         {
             int i = 0, j = 0;
@@ -51,6 +53,7 @@ namespace sudoku
             Console.WriteLine();
         }
 
+        //print the horizontal line that saprate boxes
         private static void printHorizontal()
         {
             int i = 0;

@@ -9,13 +9,14 @@ namespace sudoku
     internal class Solver
     {
         private const int SIZE = 9;
+        private const int SQUARE_SIZE = 3;
         private const int FULL_MASK = 0b1111111110;
 
         private static int countBits(int domain)
         {
             int count = 0;
             //counting the number of bits that are on
-            while(domain != 0)
+            while (domain != 0)
             {
                 domain &= domain - 1;
                 count++;
@@ -70,12 +71,66 @@ namespace sudoku
             }
 
             //if didn't found an empty cell then board is complete
-            if(!found)
+            if (!found)
             {
                 minDomain = 0;
                 return true;
             }
             //found cell and is not a dead end
+            return true;
+        }
+
+        private static bool checkNeighbors(int[,] board, int[] row, int[] col, int[] box, int rowIndex, int colIndex)
+        {
+            int i = 0, j = 0, rowStart = 0, colStart = 0, domain = 0;
+
+            //checking for numbers in the same row
+            for(j = 0; j < SIZE; j++)
+            {
+                if (board[rowIndex, j] != 0) { continue; }
+
+                domain = FULL_MASK & ~(row[rowIndex] | col[j] | 
+                    box[(rowIndex / 3) * 3 + (j / 3)]);
+                if (domain == 0)
+                {
+                    return false;
+                }
+            }
+
+            //checking for number in the same col
+            for (i = 0; i < SIZE; i++)
+            {
+                if (board[i, colIndex] != 0) { continue; }
+
+                domain = FULL_MASK & ~(row[i] | col[colIndex] | 
+                    box[(i / 3) * 3 + (colIndex / 3)]);
+                if (domain == 0)
+                {
+                    return false;
+                }
+
+            }
+
+            rowStart = (rowIndex / SQUARE_SIZE) * SQUARE_SIZE;
+            colStart = (colIndex / SQUARE_SIZE) * SQUARE_SIZE;
+            //checking for numbers in the same box
+            for(i = 0; i < SQUARE_SIZE; i+= 2)
+            {
+                for(j = 0; j < SQUARE_SIZE; j+= 2)
+                {
+                    int r = rowStart + i;
+                    int c = colStart + j;
+
+                    if (board[r, c] != 0) { continue; }
+
+                    domain = FULL_MASK & ~(row[r] | col[c] |
+                        box[(r / 3) * 3 + (c / 3)]);
+                    if (domain == 0)
+                    {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
         private static bool sudokuSolverRec(int[,] board, int[] row, int[] col, int[] box)
@@ -91,12 +146,12 @@ namespace sudoku
 
             //if the domain is 0 and we didn't get false
             //on findMrvCell then the board is complete
-            if(domain == 0)
+            if (domain == 0)
             {
                 return true;
-            }    
+            }
 
-            boxIndex = (rowIndex / 3) *3 + (colIndex / 3);
+            boxIndex = (rowIndex / 3) * 3 + (colIndex / 3);
 
             for (num = 1; num <= 9; num++)
             {
@@ -110,8 +165,11 @@ namespace sudoku
                 col[colIndex] |= bit;
                 box[boxIndex] |= bit;
 
-                if (sudokuSolverRec(board, row, col, box))
+                if (checkNeighbors(board, row, col, box, rowIndex, colIndex) &&
+                    sudokuSolverRec(board, row, col, box))
+                {
                     return true;
+                }
 
                 //Unmask the number num in the corresponding row, column and box masks
                 board[rowIndex, colIndex] = 0;
@@ -137,7 +195,7 @@ namespace sudoku
                     value = board[i, j];
                     if (value == 0) { continue; }
 
-                bit = 1 << value;
+                    bit = 1 << value;
                     row[i] |= bit;
                     col[j] |= bit;
                     box[(i / 3) * 3 + j / 3] |= bit;

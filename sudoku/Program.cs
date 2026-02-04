@@ -21,15 +21,19 @@ namespace sudoku
                 Console.WriteLine("Enter sudoku board(enter END to exit):\n");
                 boardStr = Console.ReadLine();
 
+                //checking if the user want to exit
                 if (boardStr.ToUpper().Equals("END")) break;
+                //checking if the board input from the user is valid
                 if(!validate.checkBoard(boardStr))
                 {
                     Console.WriteLine("Invalid board");
                     continue;
                 }
 
+                //converting the board input to sudoku board
                 board = Formatting.boardToStr(boardStr);
 
+                //checks if the board is solvable
                 if(!validate.checkCorrectness(board))
                 {
                     Console.WriteLine("The board is unsolvable");
@@ -39,7 +43,7 @@ namespace sudoku
                 Console.WriteLine("\nBefore solving:");
                 Formatting.printBoard(board);
 
-
+                //solving the board and counting time
                 sw = Stopwatch.StartNew();
                 Solver.solveSudoku(board);
                 sw.Stop();
@@ -48,7 +52,8 @@ namespace sudoku
                 Formatting.printBoard(board);
                 Console.WriteLine($"Took the program " +
                     $"{sw.Elapsed.TotalMilliseconds:F3} " +
-                    $"ms to solve the sudoku\n");
+                    $"ms or {sw.Elapsed.TotalSeconds:F6}" +
+                    $" seconds to solve the sudoku\n");
             }
         }
     }
