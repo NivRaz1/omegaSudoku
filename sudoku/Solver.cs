@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sudoku
+namespace Sudoku
 {
-    internal class Solver
+    public class Solver
     {
         private const int SIZE = 9;
         private const int SQUARE_SIZE = 3;

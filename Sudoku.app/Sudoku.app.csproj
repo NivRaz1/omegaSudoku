@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C1B2CCB0-A543-4587-BE8D-D605ADB54BD8}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>sudoku</RootNamespace>
-    <AssemblyName>sudoku</AssemblyName>
+    <ProjectGuid>{04904AAC-4ECE-4C6D-8E1C-A9531AA29929}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Sudoku.app</RootNamespace>
+    <AssemblyName>Sudoku.app</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,9 +32,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,14 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Formatting.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Solver.cs" />
-    <Compile Include="validate.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\sudoku\Sudoku.csproj">
+      <Project>{c1b2ccb0-a543-4587-be8d-d605adb54bd8}</Project>
+      <Name>Sudoku</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

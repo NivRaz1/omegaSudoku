@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace sudoku
+namespace Sudoku
 {
-    internal class validate
+    public class validate
     {
         private const int SIZE = 9;
         public static bool checkBoard(String boardStr)
