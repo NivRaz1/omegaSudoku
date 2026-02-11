@@ -9,6 +9,9 @@ namespace Sudoku
     public class validate
     {
         private const int SIZE = 9;
+        private const int CELL_OCCUPIED = 0;
+        private const int SQUARE_SIZE = 3;
+        private const int BIT_ON = 1;
         public static bool checkBoard(String boardStr)
         {
             //checking if the board input is in the correct length
@@ -33,15 +36,15 @@ namespace Sudoku
                 {
                     value = board[i, j];
 
-                    if (value == 0) continue;
+                    if (value == CELL_OCCUPIED) continue;
 
-                    bit = 1 << value;
+                    bit = BIT_ON << value;
 
                     //checking if the bit is already on and if
                     //so then the board is unsolvable
                     if ((row[i] & bit) != 0 ||
                         (col[j] & bit) != 0 ||
-                        (box[(i / 3) * 3 + j / 3] & bit) != 0)
+                        (box[(i / SQUARE_SIZE) * SQUARE_SIZE + j / SQUARE_SIZE] & bit) != 0)
                     {
                         return false;
                     }
@@ -49,7 +52,7 @@ namespace Sudoku
                     //mapping the current bit in place number to be on
                     row[i] |= bit;
                     col[j] |= bit;
-                    box[(i / 3) * 3 + j / 3] |= bit;
+                    box[(i / SQUARE_SIZE) * SQUARE_SIZE + j / SQUARE_SIZE] |= bit;
                 }
             }
             return true;
