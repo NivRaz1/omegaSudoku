@@ -11,12 +11,17 @@ namespace Sudoku
         private const int SIZE = 9;
         private const int SQUARE_SIZE = 3;
         private const int FULL_MASK = 0b1111111110;
+        private const int MIN_COUNT = 1;
+        private const int DEAD_END = 0;
+        private const int BOARD_FINISHED = 0;
+        private const int BIT_ON = 1;
+        private const int CELL_OCCUPIED = 0;
 
         private static int countBits(int domain)
         {
             int count = 0;
             //counting the number of bits that are on
-            while (domain != 0)
+            while (domain != CELL_OCCUPIED)
             {
                 domain &= domain - 1;
                 count++;
@@ -37,14 +42,14 @@ namespace Sudoku
                     // the cell is not empty
                     if (board[i, j] != 0) continue;
 
-                    boxIndex = (i / 3) * 3 + (j / 3);
+                    boxIndex = (i / SQUARE_SIZE) * SQUARE_SIZE + (j / SQUARE_SIZE);
                     //calculating the domain of avilable numbers for the cell
                     domain = FULL_MASK & ~(row[i] | col[j] | box[boxIndex]);
                     //counting the domain length
                     count = countBits(domain);
 
                     //if there are 0 avilable moves then its a dead end
-                    if (count == 0)
+                    if (count == DEAD_END)
                     {
                         minDomain = 0;
                         return false;
@@ -61,8 +66,8 @@ namespace Sudoku
                         found = true; // found an empty cell
 
                         //if the cell has only 1 legal move
-                        //then it's the strongest chice
-                        if (count == 1)
+                        //then it's the strongest choice
+                        if (count == MIN_COUNT)
                         {
                             return true;
                         }
@@ -90,7 +95,7 @@ namespace Sudoku
                 if (board[rowIndex, j] != 0) { continue; }
 
                 domain = FULL_MASK & ~(row[rowIndex] | col[j] | 
-                    box[(rowIndex / 3) * 3 + (j / 3)]);
+                    box[(rowIndex / SQUARE_SIZE) * SQUARE_SIZE + (j / SQUARE_SIZE)]);
                 if (domain == 0)
                 {
                     return false;
@@ -100,15 +105,14 @@ namespace Sudoku
             //checking for number in the same col
             for (i = 0; i < SIZE; i++)
             {
-                if (board[i, colIndex] != 0) { continue; }
+                if (board[i, colIndex] != CELL_OCCUPIED) { continue; }
 
                 domain = FULL_MASK & ~(row[i] | col[colIndex] | 
-                    box[(i / 3) * 3 + (colIndex / 3)]);
-                if (domain == 0)
+                    box[(i / SQUARE_SIZE) * SQUARE_SIZE + (colIndex / SQUARE_SIZE)]);
+                if (domain == DEAD_END)
                 {
                     return false;
                 }
-
             }
 
             rowStart = (rowIndex / SQUARE_SIZE) * SQUARE_SIZE;
@@ -124,8 +128,8 @@ namespace Sudoku
                     if (board[r, c] != 0) { continue; }
 
                     domain = FULL_MASK & ~(row[r] | col[c] |
-                        box[(r / 3) * 3 + (c / 3)]);
-                    if (domain == 0)
+                        box[(r / SQUARE_SIZE) * SQUARE_SIZE + (c / SQUARE_SIZE)]);
+                    if (domain == DEAD_END)
                     {
                         return false;
                     }
@@ -146,17 +150,17 @@ namespace Sudoku
 
             //if the domain is 0 and we didn't get false
             //on findMrvCell then the board is complete
-            if (domain == 0)
+            if (domain == BOARD_FINISHED)
             {
                 return true;
             }
 
-            boxIndex = (rowIndex / 3) * 3 + (colIndex / 3);
+            boxIndex = (rowIndex / SQUARE_SIZE) * SQUARE_SIZE + (colIndex / SQUARE_SIZE);
 
-            for (num = 1; num <= 9; num++)
+            for (num = 1; num <= SIZE; num++)
             {
                 //checking if the bit for the number is on
-                bit = 1 << num;
+                bit = BIT_ON << num;
                 if ((domain & bit) == 0) continue;
 
                 //Update masks for the corresponding row, column, and box
@@ -193,12 +197,12 @@ namespace Sudoku
                 for (int j = 0; j < SIZE; j++)
                 {
                     value = board[i, j];
-                    if (value == 0) { continue; }
+                    if (value == CELL_OCCUPIED) { continue; }
 
-                    bit = 1 << value;
+                    bit = BIT_ON << value;
                     row[i] |= bit;
                     col[j] |= bit;
-                    box[(i / 3) * 3 + j / 3] |= bit;
+                    box[(i / SQUARE_SIZE) * SQUARE_SIZE + j / SQUARE_SIZE] |= bit;
                 }
             }
             return sudokuSolverRec(board, row, col, box);

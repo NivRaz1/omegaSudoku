@@ -35,13 +35,13 @@ namespace Sudoku
 
             for (i = 0; i < SIZE; i++)
             {
-                if (i > 0 && i % (SIZE / SQUARE_COUNT) == 0)
+                if (i > 0 && i % SQUARE_COUNT == 0)
                 {
                     printHorizontal();
                 }
                 for (j = 0; j < SIZE; j++)
                 {
-                    if(j > 0 && j % (SIZE / SQUARE_COUNT) == 0)
+                    if(j > 0 && j % SQUARE_COUNT == 0)
                     {
                         Console.Write("| ");
                     }
